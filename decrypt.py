@@ -22,20 +22,6 @@ def extract_key_from_file(key_file_path: str) -> Dict[str, int]:
         if 'n' in key_data:
             print(f"Modulus bit length: {key_data['n'].bit_length()}")
         
-        # Verify p_inv if available
-        if 'p' in key_data and 'q' in key_data and 'p_inv' in key_data:
-            p = key_data['p']
-            q = key_data['q']
-            p_inv = key_data['p_inv']
-            
-            # Check if p_inv is correct
-            expected_p_inv = pow(p, -1, q)
-            if p_inv != expected_p_inv:
-                print(f"Warning: p_inv in the key file might be incorrect.")
-                print(f"Key file p_inv: {p_inv}")
-                print(f"Calculated p_inv: {expected_p_inv}")
-                print("Replacing with the calculated value.")
-                key_data['p_inv'] = expected_p_inv
         
         return key_data
     except Exception as e:
@@ -104,44 +90,6 @@ def rsa_decrypt(ciphertext: bytes, n: int, d: int) -> bytes:
         raise
 
 
-def rsa_decrypt_crt(ciphertext: bytes, p: int, q: int, d: int, p_inv: int) -> bytes:
-    """
-    Perform RSA decryption using Chinese Remainder Theorem for optimization.
-    p_inv is the modular multiplicative inverse of p modulo q.
-    """
-    try:
-        c = bytes_to_int(ciphertext)
-        n = p * q
-        
-        if c >= n:
-            print(f"Warning: Ciphertext value is larger than modulus")
-            raise ValueError("Ciphertext too large")
-        
-        # Compute message using CRT
-        dp = d % (p - 1)
-        dq = d % (q - 1)
-        
-        # m1 = c^dp mod p
-        m1 = pow(c, dp, p)
-        
-        # m2 = c^dq mod q
-        m2 = pow(c, dq, q)
-        
-        # h = (m1 - m2) * p_inv mod q
-        h = ((m1 - m2) * p_inv) % q
-        if h < 0:
-            h += q  # Ensure h is positive
-        
-        # m = m2 + h * p mod n
-        m = (m2 + h * p) % n
-        
-        # Calculate byte length of n
-        byte_len = (n.bit_length() + 7) // 8
-        
-        return int_to_bytes(m, byte_len)
-    except Exception as e:
-        print(f"Error in RSA-CRT decrypt: {e}")
-        raise
 
 
 def oaep_unpad(padded_message: bytes, k: int, label: bytes = b"") -> Optional[bytes]:
@@ -228,24 +176,7 @@ def decrypt_block(ciphertext: bytes, key: Dict[str, int]) -> Optional[bytes]:
         n = key['n']
         d = key['d']
         
-        # First try with CRT if parameters are available
-        if 'p' in key and 'q' in key and 'p_inv' in key:
-            print("Using CRT for decryption")
-            p = key['p']
-            q = key['q']
-            p_inv = key['p_inv']
-            try:
-                decrypted_padded = rsa_decrypt_crt(ciphertext, p, q, d, p_inv)
-                k = (n.bit_length() + 7) // 8
-                result = oaep_unpad(decrypted_padded, k)
-                if result is not None:
-                    return result
-                print("CRT decryption failed to produce valid padding, trying standard RSA...")
-            except Exception as e:
-                print(f"CRT decryption failed: {e}, trying standard RSA...")
-        
-        # Try with standard RSA if CRT fails or parameters aren't available
-        print("Using standard RSA decryption")
+        print("Decrypting...")
         decrypted_padded = rsa_decrypt(ciphertext, n, d)
         
         k = (n.bit_length() + 7) // 8  # RSA modulus size in bytes
