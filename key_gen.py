@@ -1,5 +1,9 @@
 from typing import Tuple, Dict
-import random
+import secrets
+
+# Using secrets instead of random module for better security
+# https://docs.python.org/3/library/secrets.html
+
 
 def miller_rabin_test(n: int, k: int = 40) -> bool:
     """
@@ -25,7 +29,7 @@ def miller_rabin_test(n: int, k: int = 40) -> bool:
     
     # Witness loop
     for _ in range(k):
-        a = random.randint(2, n - 2)
+        a = secrets.randbelow(n - 3) + 2  #random.randint(2, n - 2)
         x = pow(a, d, n)
         if x == 1 or x == n - 1:
             continue
@@ -49,7 +53,7 @@ def generate_prime(bits: int) -> int:
     """
     while True:
         # Generate a random odd number with the specified bit length
-        p = random.getrandbits(bits)
+        p = secrets.randbits(bits) #random.getrandbits(bits)
         # Set the most significant bit to ensure the bit length
         p |= (1 << bits - 1)
         # Set the least significant bit to ensure it's odd
