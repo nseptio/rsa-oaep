@@ -63,7 +63,7 @@ def decrypt_file():
     )
     
     if ciphertext_path and private_key_path:
-        output_path = filedialog.asksaveasfilename(title="Save Decrypted File As", initialdir="./")
+        output_path = filedialog.asksaveasfilename(title="Save Decrypted File As", initialdir="outputs/")
         if not output_path:
             return
         
