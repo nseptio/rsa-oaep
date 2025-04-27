@@ -109,9 +109,13 @@ def generate_rsa_keypair(bits: int = 2048) -> Tuple[Dict[str, int], Dict[str, in
     # Generate two prime numbers of half the bit length
     p_bits = bits // 2
     q_bits = bits - p_bits
-    
-    p = generate_prime(p_bits)
-    q = generate_prime(q_bits)
+
+    while True:
+        p = generate_prime(p_bits)
+        q = generate_prime(q_bits)
+        # Make sure p != q
+        if p != q:
+            break
     
     # Calculate n and totient(n)
     n = p * q
@@ -123,9 +127,6 @@ def generate_rsa_keypair(bits: int = 2048) -> Tuple[Dict[str, int], Dict[str, in
     # Calculate d (private exponent)
     d = mod_inverse(e, totient)
     
-    # Additional CRT parameters for private key
-    p_inv = mod_inverse(p, q)
-    
     # Create public and private keys
     public_key = {
         "n": n,
@@ -134,10 +135,7 @@ def generate_rsa_keypair(bits: int = 2048) -> Tuple[Dict[str, int], Dict[str, in
     
     private_key = {
         "n": n,
-        "d": d,
-        "p": p,
-        "q": q,
-        "p_inv": p_inv
+        "d": d
     }
     
     return public_key, private_key
@@ -237,5 +235,4 @@ def generate_and_save_keypair(
     print(f"Key pair generated and saved to {public_key_file} and {private_key_file}")
 
 if __name__ == "__main__":
-    # Example usage
     generate_and_save_keypair()
