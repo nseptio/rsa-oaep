@@ -215,6 +215,7 @@ def load_key_from_file(filename: str) -> Dict[str, int]:
 
 def generate_and_save_keypair(
         bits: int = 2048,
+        key_dir: str = "keys/",
         public_key_file: str = "public_key.txt",
         private_key_file: str = "private_key.txt"
     ) -> None:
@@ -223,10 +224,14 @@ def generate_and_save_keypair(
     
     Args:
         bits: The bit length for the RSA modulus
+        key_dir: Directory to save the keys
         public_key_file: Filename for public key
         private_key_file: Filename for private key
     """
     public_key, private_key = generate_rsa_keypair(bits)
+    
+    public_key_file = key_dir + public_key_file
+    private_key_file = key_dir + private_key_file
     save_key_to_file(public_key, public_key_file, "PUBLIC")
     save_key_to_file(private_key, private_key_file, "PRIVATE")
     print(f"Key pair generated and saved to {public_key_file} and {private_key_file}")

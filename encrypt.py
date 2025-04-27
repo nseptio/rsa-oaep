@@ -200,8 +200,6 @@ def encrypt_file(input_file_path: str, public_key_path: str, output_file_path: s
                 print("End of file reached")
                 break
             
-            print(f"\nProcessing block #{block_count+1}, length: {len(block)} bytes")
-            
             # Encrypt block
             encrypted_block = encrypt_block(block, key)
             

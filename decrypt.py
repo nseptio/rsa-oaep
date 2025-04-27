@@ -287,7 +287,6 @@ def decrypt_file(input_file_path: str, private_key_path: str, output_file_path: 
                 break
             
             block_length = struct.unpack('>I', length_bytes)[0]
-            print(f"\nProcessing block #{block_count+1}, length: {block_length} bytes")
             
             # Read the encrypted block
             encrypted_block = infile.read(block_length)
@@ -296,7 +295,6 @@ def decrypt_file(input_file_path: str, private_key_path: str, output_file_path: 
                 raise ValueError("Corrupted input file")
             
             # Decrypt block
-            print(f"Decrypting block of {len(encrypted_block)} bytes")
             decrypted_block = decrypt_block(encrypted_block, key)
             
             if decrypted_block is None:
@@ -304,7 +302,6 @@ def decrypt_file(input_file_path: str, private_key_path: str, output_file_path: 
                 raise ValueError("Decryption failed: Invalid padding")
             
             # Write the decrypted block
-            print(f"Writing {len(decrypted_block)} bytes of decrypted data")
             outfile.write(decrypted_block)
             block_count += 1
     
