@@ -36,4 +36,16 @@ build/
 Thumbs.db
 desktop.ini
 
+# Generated files
 img/
+keys/
+outputs/
+*.log
+*.jpg
+*.png
+*.jpeg
+*.gif
+*.mp4
+*.avi
+*.mov
+*.mkv
