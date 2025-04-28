@@ -105,19 +105,15 @@ def oaep_pad(message: bytes, k: int, label: bytes = b"") -> bytes:
     
     # Compute label hash
     lHash = sha256(label)
-    print(f"Label hash: {binascii.hexlify(lHash)}")
     
     # Generate padding string
     PS = b'\x00' * (k - mLen - 2 * hLen - 2)
-    print(f"Padding string length: {len(PS)}")
     
     # Construct data block
     DB = lHash + PS + b'\x01' + message
-    print(f"Data block length: {len(DB)}")
     
     # Generate random seed
     seed = os.urandom(hLen)
-    print(f"Seed generated: {len(seed)} bytes")
     
     # Calculate mask for DB
     dbMask = mgf1(seed, k - hLen - 1)
@@ -133,7 +129,6 @@ def oaep_pad(message: bytes, k: int, label: bytes = b"") -> bytes:
     
     # Construct the padded message
     padded = b'\x00' + maskedSeed + maskedDB
-    print(f"Final padded message length: {len(padded)}")
     
     return padded
 
@@ -145,11 +140,9 @@ def encrypt_block(message: bytes, key: Dict[str, int]) -> bytes:
         e = key['e']
         
         k = (n.bit_length() + 7) // 8  # RSA modulus size in bytes
-        print(f"RSA modulus size: {k} bytes")
         
         # Apply OAEP padding
         padded_message = oaep_pad(message, k)
-        print(f"Message padded successfully, length: {len(padded_message)} bytes")
         
         # Apply RSA encryption
         encrypted = rsa_encrypt(padded_message, n, e)

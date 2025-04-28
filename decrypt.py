@@ -90,8 +90,6 @@ def rsa_decrypt(ciphertext: bytes, n: int, d: int) -> bytes:
         raise
 
 
-
-
 def oaep_unpad(padded_message: bytes, k: int, label: bytes = b"") -> Optional[bytes]:
     """
     Remove OAEP padding from the message.
@@ -100,7 +98,6 @@ def oaep_unpad(padded_message: bytes, k: int, label: bytes = b"") -> Optional[by
     """
     hLen = 32  # SHA-256 hash length in bytes
     
-    print(f"OAEP unpad: padded message length={len(padded_message)}, k={k}")
     print(f"First few bytes (hex): {binascii.hexlify(padded_message[:16])}")
     
     # Check if padded message has correct length
@@ -108,17 +105,15 @@ def oaep_unpad(padded_message: bytes, k: int, label: bytes = b"") -> Optional[by
         print(f"Error: Padded message length {len(padded_message)} doesn't match expected length {k}")
         return None
     
-    # Check if first byte is 0x00 as required by PKCS#1 v2.1
+    # Check if first byte is 0x00
     if padded_message[0] != 0:
         print(f"Error: First byte is {padded_message[0]}, expected 0")
-        # Try alternative approach - use standard RSA decryption as fallback
         return None
     
     # Separate parts of the padded message
     maskedSeed = padded_message[1:1+hLen]
     maskedDB = padded_message[1+hLen:]
     
-    print(f"Masked seed length: {len(maskedSeed)}, Masked DB length: {len(maskedDB)}")
     
     # Calculate seed mask
     seedMask = mgf1(maskedDB, hLen)
@@ -142,8 +137,6 @@ def oaep_unpad(padded_message: bytes, k: int, label: bytes = b"") -> Optional[by
         print(f"Got: {binascii.hexlify(DB[:hLen])}")
         return None
     
-    # Print a portion of DB for debugging
-    print(f"DB prefix (hex): {binascii.hexlify(DB[:40])}")
     
     # Find the index of the first 0x01 byte after lHash
     one_index = hLen
@@ -180,8 +173,6 @@ def decrypt_block(ciphertext: bytes, key: Dict[str, int]) -> Optional[bytes]:
         decrypted_padded = rsa_decrypt(ciphertext, n, d)
         
         k = (n.bit_length() + 7) // 8  # RSA modulus size in bytes
-        print(f"RSA modulus size: {k} bytes")
-        print(f"Decrypted padded message length: {len(decrypted_padded)} bytes")
         
         # Remove OAEP padding
         return oaep_unpad(decrypted_padded, k)
