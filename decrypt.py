@@ -1,3 +1,4 @@
+import os
 import sha256_imp
 import math
 import struct
@@ -168,7 +169,6 @@ def decrypt_block(ciphertext: bytes, key: Dict[str, int]) -> Optional[bytes]:
         n = key['n']
         d = key['d']
         
-        print("Decrypting...")
         decrypted_padded = rsa_decrypt(ciphertext, n, d)
         
         k = (n.bit_length() + 7) // 8  # RSA modulus size in bytes
@@ -180,7 +180,7 @@ def decrypt_block(ciphertext: bytes, key: Dict[str, int]) -> Optional[bytes]:
         raise
 
 
-def decrypt_file(input_file_path: str, private_key_path: str, output_file_path: str) -> None:
+def decrypt_file(input_file_path: str, private_key_path: str) -> None:
     """
     Decrypt a file using RSA-OAEP.
     
@@ -191,15 +191,40 @@ def decrypt_file(input_file_path: str, private_key_path: str, output_file_path: 
     """
     print(f"\nDecrypting file: {input_file_path}")
     print(f"Using private key: {private_key_path}")
-    print(f"Output will be written to: {output_file_path}")
+    
+    # Create outputs directory if it doesn't exist
+    os.makedirs("/outputs", exist_ok=True)
     
     # Extract private key
     key = extract_key_from_file(private_key_path)
     
     block_count = 0
     
+    with open(input_file_path, 'rb') as infile:
+        # Read the original file extension from the beginning of the encrypted file
+        ext_len_bytes = infile.read(4) # 4 bytes for extension length
+        if not ext_len_bytes or len(ext_len_bytes) < 4:
+            raise ValueError("Invalid encrypted file format")
+            
+        ext_length = struct.unpack('>I', ext_len_bytes)[0]
+        extension_bytes = infile.read(ext_length)
+        file_extension = extension_bytes.decode('utf-8')
+        
+        # Generate output filename with original extension
+        base_name = os.path.basename(input_file_path)
+        output_name = os.path.splitext(base_name)[0]  # Remove .bin extension
+        if file_extension:
+            output_file_path = f"./outputs/{output_name}.{file_extension}"
+        else:
+            output_file_path = f"./outputs/{output_name}"
+    
+    print(f"Output will be written to: {output_file_path}")
+    
     # Process file in blocks
     with open(input_file_path, 'rb') as infile, open(output_file_path, 'wb') as outfile:
+        # Skip the file extension information that we already read
+        infile.seek(4 + ext_length)
+        
         while True:
             # Read the length of the next encrypted block
             length_bytes = infile.read(4)
@@ -235,12 +260,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='RSA-OAEP Decryption')
     parser.add_argument('input_file', help='Path to the ciphertext file')
     parser.add_argument('private_key', help='Path to the private key file')
-    parser.add_argument('output_file', help='Path to write the plaintext file')
     
     args = parser.parse_args()
     
     try:
-        decrypt_file(args.input_file, args.private_key, args.output_file)
-        print(f"\nFile decrypted successfully. Output written to {args.output_file}")
+        decrypt_file(args.input_file, args.private_key)
+        print(f"\nFile decrypted successfully")
     except Exception as e:
         print(f"\nDecryption failed with error: {e}")

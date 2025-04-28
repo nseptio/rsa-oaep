@@ -153,15 +153,21 @@ def encrypt_block(message: bytes, key: Dict[str, int]) -> bytes:
         raise
 
 
-def encrypt_file(input_file_path: str, public_key_path: str, output_file_path: str) -> None:
+def encrypt_file(input_file_path: str, public_key_path: str) -> None:
     """
     Encrypt a file using RSA-OAEP.
     
     Args:
         input_file_path: Path to the plaintext file
         public_key_path: Path to the public key file
-        output_file_path: Path to write the ciphertext file
     """
+    # Create outputs directory if it doesn't exist
+    os.makedirs("/outputs", exist_ok=True)
+    
+    base_name = os.path.basename(input_file_path)
+    input_name = os.path.splitext(base_name)[0]
+    output_file_path = f"./outputs/{input_name}.bin"
+    
     print(f"\nEncrypting file: {input_file_path}")
     print(f"Using public key: {public_key_path}")
     print(f"Output will be written to: {output_file_path}")
@@ -178,6 +184,10 @@ def encrypt_file(input_file_path: str, public_key_path: str, output_file_path: s
     
     print(f"Maximum message length per block: {max_message_len} bytes")
     
+    # Get original file extension for storing in the encrypted file
+    _, file_extension = os.path.splitext(input_file_path)
+    file_extension = file_extension.lstrip('.')  # Remove leading dot
+    
     # Get file size
     file_size = os.path.getsize(input_file_path)
     print(f"Input file size: {file_size} bytes")
@@ -186,6 +196,11 @@ def encrypt_file(input_file_path: str, public_key_path: str, output_file_path: s
     
     # Process file in blocks
     with open(input_file_path, 'rb') as infile, open(output_file_path, 'wb') as outfile:
+        # Write the original file extension at the beginning of the encrypted file
+        extension_bytes = file_extension.encode('utf-8')
+        outfile.write(struct.pack('>I', len(extension_bytes)))
+        outfile.write(extension_bytes)
+        
         while True:
             block = infile.read(max_message_len)
             if not block:
@@ -213,12 +228,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='RSA-OAEP Encryption')
     parser.add_argument('input_file', help='Path to the plaintext file')
     parser.add_argument('public_key', help='Path to the public key file')
-    parser.add_argument('output_file', help='Path to write the ciphertext file')
     
     args = parser.parse_args()
     
     try:
-        encrypt_file(args.input_file, args.public_key, args.output_file)
-        print(f"\nFile encrypted successfully. Output written to {args.output_file}")
+        encrypt_file(args.input_file, args.public_key)
+        print(f"\nFile encrypted successfully")
     except Exception as e:
         print(f"\nEncryption failed with error: {e}")

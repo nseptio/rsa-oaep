@@ -30,21 +30,20 @@ def generate_keys():
 
 def encrypt_file():
     plaintext_path = filedialog.askopenfilename(title="Select Plaintext File", initialdir="./")
+    if not plaintext_path:
+        return
+    
     public_key_path = filedialog.askopenfilename(
         title="Select Public Key File", initialdir="keys/",filetypes=[("Public Key Files", "*.txt")])
+    if not public_key_path:
+        return
     
     if plaintext_path and public_key_path:
         set_status("Encrypting file...")
         try:
-            output_path = filedialog.asksaveasfilename(
-                title="Save Encrypted File As", initialdir="outputs/",
-                defaultextension=".bin",
-                filetypes=[("Binary Files", "*.bin")]
-            )
-            if not output_path:
-                return
-            encrypt(plaintext_path, public_key_path, output_path)
-            messagebox.showinfo("Success", f"Encryption complete!\nSaved to {output_path}")
+
+            encrypt(plaintext_path, public_key_path)
+            messagebox.showinfo("Success", f"Encryption complete!")
             set_status("Encryption completed.")
         except Exception as e:
             messagebox.showerror("Error", f"Encryption failed:\n{str(e)}")
@@ -53,24 +52,25 @@ def encrypt_file():
 def decrypt_file():
     ciphertext_path = filedialog.askopenfilename(
         title="Select Ciphertext File",
-        initialdir="outputs/,",
+        initialdir="outputs/",
         filetypes=[("Binary Files", "*.bin")]
     )
+    if not ciphertext_path:
+        return
+    
     private_key_path = filedialog.askopenfilename(
         title="Select Private Key File",
         initialdir="keys/",
         filetypes=[("Private Key Files", "*.txt")]
     )
+    if not private_key_path:
+        return
     
-    if ciphertext_path and private_key_path:
-        output_path = filedialog.asksaveasfilename(title="Save Decrypted File As", initialdir="outputs/")
-        if not output_path:
-            return
-        
+    if ciphertext_path and private_key_path:        
         set_status("Decrypting file...")
         try:
-            decrypt(ciphertext_path, private_key_path, output_path)
-            messagebox.showinfo("Success", f"Decryption complete!\nSaved to {output_path}")
+            decrypt(ciphertext_path, private_key_path)
+            messagebox.showinfo("Success", f"Decryption complete!\nSaved to {ciphertext_path.replace('.bin', '')}")
             set_status("Decryption completed.")
         except Exception as e:
             messagebox.showerror("Error", f"Decryption failed:\n{str(e)}")

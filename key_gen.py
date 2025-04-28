@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Dict
 import secrets
 
@@ -230,6 +231,7 @@ def generate_and_save_keypair(
         public_key_file: Filename for public key
         private_key_file: Filename for private key
     """
+    os.makedirs(key_dir, exist_ok=True)  # Create directory if it doesn't exist
     public_key, private_key = generate_rsa_keypair(bits)
     
     public_key_file = key_dir + public_key_file
