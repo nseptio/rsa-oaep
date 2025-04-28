@@ -92,6 +92,8 @@ encrypted = rsa_encrypt(padded_message, n, e)
 
 ```
 
+**NOTES: Details are omitted, the full implementation is at encrypt.py file**
+
 ### Decryption Process
 Implementation in
 `decrypt.py`, `decrypt_block()`:
@@ -102,3 +104,4 @@ decrypted_padded = rsa_decrypt(ciphertext, n, d)
 # Remove OAEP padding
 return oaep_unpad(decrypted_padded, k)
 ```
+**NOTES: Details are omitted, the full implementation is at decrypt.py file**
