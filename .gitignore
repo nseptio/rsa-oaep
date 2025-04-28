@@ -42,7 +42,6 @@ keys/
 outputs/
 *.log
 *.jpg
-*.png
 *.jpeg
 *.gif
 *.mp4
