@@ -42,7 +42,7 @@ d:<VALUE>
 Source:https://www.johndcook.com/blog/2023/08/05/rsa-oaep/
 
 Implementation in: 
-**encrypty.py**
+**encrypt.py**
 
 Function:
 ```
@@ -83,7 +83,7 @@ padded = b'\x00' + maskedSeed + maskedDB
 
 ### Encryption Process
 Implementation in
-`encrypty.py`, `encrypt_block()`:
+`encrypt.py`, `encrypt_block()`:
 ```
 # Apply OAEP padding
 padded_message = oaep_pad(message, k)
@@ -94,7 +94,7 @@ encrypted = rsa_encrypt(padded_message, n, e)
 
 ### Decryption Process
 Implementation in
-`decrypty.py`, `decrypt_block()`:
+`decrypt.py`, `decrypt_block()`:
 ```
 # Decryption
 decrypted_padded = rsa_decrypt(ciphertext, n, d)
