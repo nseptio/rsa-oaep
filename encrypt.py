@@ -1,5 +1,5 @@
 import os
-import hashlib
+import sha256_imp
 import math
 import struct
 import binascii
@@ -36,9 +36,8 @@ def extract_key_from_file(key_file_path: str) -> Dict[str, int]:
 
 def sha256(data: bytes) -> bytes:
     """Compute SHA-256 hash of data."""
-    hasher = hashlib.sha256()
-    hasher.update(data)
-    return hasher.digest()
+    hasher = sha256_imp.sha256(data)
+    return hasher
 
 
 def mgf1(seed: bytes, mask_len: int) -> bytes:
